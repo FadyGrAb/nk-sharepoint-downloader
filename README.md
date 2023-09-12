@@ -1,1 +1,1 @@
-# nk-sharepoint-downloader
+# Sharepoint downloader from Nokia Sharepoint
