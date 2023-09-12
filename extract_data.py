@@ -34,18 +34,23 @@ for file in files_dir.iterdir():
         for col_mark in range(2, 6, 2):
             temp_df = data.iloc[:, col_mark - 2 : col_mark].copy()
             temp_df.dropna(inplace=True)
-            temp_df.columns = pd.Index(["Item", "Data"])
+            temp_df.columns = pd.Index(["Item", "Serial"])
             file_data = pd.concat([file_data, temp_df])
 
         file_data["FileName"] = file.name
         file_data["SiteName"] = site_name
         file_data["Cycle"] = cycle
-        file_data["Date"] = date
+        file_data["Date"] = date.strftime("%Y-%m-%d")
+        file_data["ItemType"] = file_data.Item.apply(
+            lambda x: "Battery" if "battery" in x.lower() else "Rectifier"
+        )
 
-        final_df = pd.concat([final_df, file_data[file_data.Data != "#0"]])
+        final_df = pd.concat([final_df, file_data[file_data.Serial != "#0"]])
     except Exception as e:
         print(f"ERROR: {file.name}: {e}")
-final_df["duplicated_flag"] = final_df.duplicated(subset=["Data"])
+final_df["duplicated_flag"] = final_df.duplicated(subset=["Serial"], keep=False)
+final_df.Serial = final_df.Serial.str.strip()
+
 final_df.to_excel(
     f"serials_extract_{int(datetime.datetime.now().timestamp())}.xlsx", index=False
 )
